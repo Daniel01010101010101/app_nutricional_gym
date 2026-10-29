@@ -220,13 +220,13 @@ export const PRESCRIPTIONS = {
   /** Básicos: 3–4 × 4–6 a RIR 1–2 (≈80–87 % del 1RM). */
   main: { sets: 3, repMin: 4, repMax: 6, rirMin: 1, rirMax: 2, restSec: 180 },
   /** Compuestos secundarios. */
-  secondary: { sets: 3, repMin: 6, repMax: 10, rirMin: 1, rirMax: 2, restSec: 150 },
+  secondary: { sets: 3, repMin: 6, repMax: 10, rirMin: 1, rirMax: 2, restSec: 120 },
   /** Accesorios: 2–4 × 8–15 a RIR 0–2. */
-  accessory: { sets: 3, repMin: 10, repMax: 15, rirMin: 0, rirMax: 2, restSec: 90 },
+  accessory: { sets: 3, repMin: 10, repMax: 15, rirMin: 0, rirMax: 2, restSec: 75 },
 } as const satisfies Record<string, Prescription>
 
 /** Tiempo estimado por serie de trabajo (sin contar el descanso). */
-export const SECONDS_PER_SET = 45
+export const SECONDS_PER_SET = 40
 export const WARMUP_MINUTES = 8
 
 /* ───────────────────────────── Progresión ───────────────────────────── */

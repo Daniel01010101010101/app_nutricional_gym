@@ -17,6 +17,12 @@ const routes: RouteObject[] = [
         }),
       },
       {
+        path: 'perfil/editar',
+        lazy: async () => ({
+          Component: (await import('@/features/settings/pages/EditProfilePage')).EditProfilePage,
+        }),
+      },
+      {
         element: <AppShell />,
         children: [
           {

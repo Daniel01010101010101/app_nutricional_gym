@@ -20,6 +20,7 @@ export function prescriptionFor(
         sets: experience === 'beginner' ? 2 : base.sets,
         repMin: kind === 'compound' ? 8 : base.repMin,
         repMax: kind === 'compound' ? 12 : base.repMax,
+        restSec: kind === 'compound' ? 90 : base.restSec,
         rirMin: experience === 'beginner' ? 1 : base.rirMin,
       }
     }

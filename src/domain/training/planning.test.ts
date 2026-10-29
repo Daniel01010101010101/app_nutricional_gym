@@ -304,7 +304,7 @@ describe('plan semanal', () => {
     })
     expect(value.volume.biceps).toBeLessThanOrEqual(16)
     expect(fitToDuration(day, 25)).toBe(true)
-    expect(day.exercises.length).toBe(3)
+    expect(day.exercises.length).toBe(4)
   })
 
   it('fitToDuration recorta secundarios y básicos de 4 series antes de rendirse', () => {

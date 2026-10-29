@@ -5,6 +5,8 @@ import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useThemeStore } from '@/stores/theme'
 
+import { getRepositories } from './repositories'
+import { RepositoryProvider } from './RepositoryProvider'
 import { createAppRouter } from './router'
 
 export function App() {
@@ -18,9 +20,11 @@ export function App() {
   }, [syncWithSystem])
 
   return (
-    <TooltipProvider delayDuration={300}>
-      <RouterProvider router={router} />
-      <Toaster />
-    </TooltipProvider>
+    <RepositoryProvider repositories={getRepositories()}>
+      <TooltipProvider delayDuration={300}>
+        <RouterProvider router={router} />
+        <Toaster />
+      </TooltipProvider>
+    </RepositoryProvider>
   )
 }
