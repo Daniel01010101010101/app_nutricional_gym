@@ -1,3 +1,4 @@
+import { MEALS } from '../constants/formulas'
 import { fmt } from '../shared/format'
 import { roundTo } from '../shared/math'
 import type { Food, Macros } from '../types'
@@ -83,9 +84,14 @@ export function leanProteinSources(foods: readonly Food[]): Food[] {
     .sort((a, b) => b.per100g.protein / b.per100g.kcal - a.per100g.protein / a.per100g.kcal)
 }
 
+/** Proteína máxima que conviene sugerir de una sola vez (una comida). */
+const MAX_PROTEIN_PER_IDEA = MEALS.proteinPerMeal[1]
+
+/** Ideas concretas para una comida (como máximo ~50 g de proteína por porción sugerida). */
 function proteinIdeas(gap: number, foods: readonly Food[]): string[] {
+  const per = Math.min(gap, MAX_PROTEIN_PER_IDEA)
   const sources = leanProteinSources(foods)
-  const ideas = sources.slice(0, 2).map((f) => describePortion(f, (gap / f.per100g.protein) * 100))
+  const ideas = sources.slice(0, 2).map((f) => describePortion(f, (per / f.per100g.protein) * 100))
 
   const whey = sources.find((f) => f.category === 'supplement')
   const scoop = whey?.measures.find((m) => m.label.startsWith('1 scoop'))
@@ -93,11 +99,11 @@ function proteinIdeas(gap: number, foods: readonly Food[]): string[] {
     (f) => f.category === 'egg' && f.measures.some((m) => m.label.startsWith('1 unidad')),
   )
   const eggUnit = egg?.measures.find((m) => m.label.startsWith('1 unidad'))
-  if (whey && scoop && egg && eggUnit && gap > 30) {
+  if (whey && scoop && egg && eggUnit && per > 30) {
     const fromWhey = (whey.per100g.protein * scoop.grams) / 100
     const eggs = Math.max(
       1,
-      Math.round((gap - fromWhey) / ((egg.per100g.protein * eggUnit.grams) / 100)),
+      Math.round((per - fromWhey) / ((egg.per100g.protein * eggUnit.grams) / 100)),
     )
     ideas.push(`1 scoop de ${whey.name.toLowerCase()} + ${eggs} ${eggs === 1 ? 'huevo' : 'huevos'}`)
   }
@@ -155,7 +161,10 @@ export function nutritionGapMessage(
     return {
       status: 'protein-gap',
       title: `Te faltan ${fmt(remaining.protein)} g de proteína`,
-      detail: `Y te quedan ${fmt(Math.max(0, remaining.kcal))} kcal para el resto del día.`,
+      detail:
+        remaining.protein > MAX_PROTEIN_PER_IDEA
+          ? `Y te quedan ${fmt(Math.max(0, remaining.kcal))} kcal. Repártela en tus próximas comidas (hasta ~${MAX_PROTEIN_PER_IDEA} g en cada una), por ejemplo:`
+          : `Y te quedan ${fmt(Math.max(0, remaining.kcal))} kcal para el resto del día.`,
       ideas: proteinIdeas(remaining.protein, foods),
       remaining,
     }

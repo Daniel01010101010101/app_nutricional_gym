@@ -7,6 +7,7 @@ import { useThemeStore } from '@/stores/theme'
 
 import { getRepositories } from './repositories'
 import { RepositoryProvider } from './RepositoryProvider'
+import { PwaUpdater } from './PwaUpdater'
 import { createAppRouter } from './router'
 
 export function App() {
@@ -24,6 +25,7 @@ export function App() {
       <TooltipProvider delayDuration={300}>
         <RouterProvider router={router} />
         <Toaster />
+        <PwaUpdater />
       </TooltipProvider>
     </RepositoryProvider>
   )

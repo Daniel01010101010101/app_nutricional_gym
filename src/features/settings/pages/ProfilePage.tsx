@@ -10,6 +10,7 @@ import {
 import { Link } from 'react-router'
 
 import { Disclaimer } from '@/components/common/Disclaimer'
+import { InstallCard } from '@/components/common/InstallCard'
 import { StatTile } from '@/components/common/StatTile'
 import { WhyButton } from '@/components/common/WhyButton'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -257,6 +258,8 @@ export function ProfilePage() {
           </ol>
         </Section>
       )}
+
+      <InstallCard dismissible={false} />
 
       <Disclaimer />
     </div>

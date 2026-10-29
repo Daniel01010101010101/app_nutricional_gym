@@ -39,10 +39,31 @@ jobs:
         with:
           path: dist
 
+  e2e:
+    name: Prueba de punta a punta (móvil y sin conexión)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+        env:
+          CI: true
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-trazas
+          path: test-results
+          retention-days: 7
+
   deploy:
     name: Publicar en GitHub Pages
     if: github.event_name != 'pull_request'
-    needs: check
+    needs: [check, e2e]
     runs-on: ubuntu-latest
     permissions:
       pages: write

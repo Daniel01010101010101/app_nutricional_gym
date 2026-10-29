@@ -216,6 +216,11 @@ describe('lo que falta del día', () => {
       FOODS.filter((f) => f.id !== 'whey'),
     )
     expect(msg.ideas).toHaveLength(2)
+    // 75 g de diferencia: se sugiere repartir y cada idea es de una comida (~50 g).
+    expect(msg.detail).toContain('Repártela en tus próximas comidas')
+    expect(msg.ideas[0]).toMatch(/^\d+ g de tilapia$/)
+    const grams = Number(/^(\d+)/.exec(msg.ideas[0] ?? '')?.[1])
+    expect(grams).toBeLessThanOrEqual(260)
   })
 
   it('proteína cumplida pero faltan kcal', () => {
