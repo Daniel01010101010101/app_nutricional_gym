@@ -5,6 +5,7 @@ import type {
   DietRestriction,
   Equipment,
   ExperienceLevel,
+  FoodCategory,
   JobType,
   Joint,
   LoadType,
@@ -127,4 +128,32 @@ export const LOAD_TYPE_LABEL: Record<LoadType, string> = {
   stack: 'Máquina o polea',
   bodyweight: 'Peso corporal (+ lastre)',
   fixed: 'Peso fijo (kettlebell, banda…)',
+}
+
+export const FOOD_CATEGORY_LABEL: Record<FoodCategory, string> = {
+  meat: 'Carnes',
+  poultry: 'Pollo y aves',
+  fish: 'Pescados y mariscos',
+  egg: 'Huevos',
+  dairy: 'Lácteos',
+  legume: 'Leguminosas',
+  grain: 'Granos y cereales',
+  tuber: 'Tubérculos y plátanos',
+  bread: 'Panes y arepas',
+  fruit: 'Frutas',
+  vegetable: 'Verduras',
+  'nut-seed': 'Frutos secos y semillas',
+  fat: 'Grasas y aceites',
+  sweet: 'Dulces',
+  supplement: 'Suplementos',
+  beverage: 'Bebidas',
+  prepared: 'Preparaciones',
+  'plant-protein': 'Proteína vegetal',
+}
+
+/** Fuente corta para mostrar junto a un alimento. */
+export function foodSourceLabel(source: string): string {
+  if (source.startsWith('ICBF')) return 'ICBF'
+  if (source.startsWith('USDA')) return 'USDA'
+  return 'Calculado'
 }

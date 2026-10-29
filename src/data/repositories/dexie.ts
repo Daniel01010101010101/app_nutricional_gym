@@ -146,6 +146,8 @@ export function createDexieRepositories(db: ForjaDB): Repositories {
       get: (date) => db.mealPlans.get(date),
       observe: (date) => live(() => db.mealPlans.get(date)),
       listRange: (from, to) => db.mealPlans.where('date').between(from, to, true, true).toArray(),
+      observeRange: (from, to) =>
+        live(() => db.mealPlans.where('date').between(from, to, true, true).toArray()),
       save: async (plan) => {
         await db.mealPlans.put(plan)
       },

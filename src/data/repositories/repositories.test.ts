@@ -200,6 +200,7 @@ describe('registro de comidas, favoritas, planes y registros diarios', () => {
     expect(await repos.mealPlans.get('2026-01-05')).toBeDefined()
     expect(await first(repos.mealPlans.observe('2026-01-06'))).toBeDefined()
     expect(await repos.mealPlans.listRange('2026-01-01', '2026-01-31')).toHaveLength(2)
+    expect(await first(repos.mealPlans.observeRange('2026-01-06', '2026-01-31'))).toHaveLength(1)
     await repos.mealPlans.remove('2026-01-05')
     expect(await repos.mealPlans.get('2026-01-05')).toBeUndefined()
 

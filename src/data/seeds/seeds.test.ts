@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { fitsBudget, isFoodAllowed, type FoodPreferences } from '@/domain/nutrition/foods'
 import { buildMealSlots, distributeMacros, type MealsPerDay } from '@/domain/nutrition/meals'
 import { generateDayPlan } from '@/domain/nutrition/mealPlanner'
+import { weeklyFoodPool } from '@/domain/nutrition/rotation'
+import { buildShoppingList } from '@/domain/nutrition/shopping'
 import { buildNutritionPlan } from '@/domain/nutrition/plan'
 import { generateTrainingPlan } from '@/domain/training/planner'
 import { EQUIPMENT_PRESETS, type EquipmentPreset } from '@/domain/training/selection'
@@ -89,6 +91,30 @@ describe('generador de comidas con el catálogo real', () => {
       expect(result.withinTolerance, JSON.stringify(result.deviation)).toBe(true)
     }
   })
+
+  it.each(cases)(
+    '$label: la rotación semanal cuadra y deja una lista corta',
+    ({ prefs, meals, training }) => {
+      const foods = FOODS_DATA.filter((f) => isFoodAllowed(f, prefs) && fitsBudget(f, prefs.budget))
+      const targets = distributeMacros(buildMealSlots(meals, training), dayTarget)
+      for (let week = 0; week < 4; week++) {
+        const pool = weeklyFoodPool(foods, 1000 + week * 31)
+        const days = Array.from({ length: 7 }, (_, d) => {
+          const result = generateDayPlan({
+            meals: targets,
+            foods: pool,
+            dayTarget,
+            seed: 5000 + week * 7 + d,
+          })
+          expect(result.withinTolerance, JSON.stringify(result.deviation)).toBe(true)
+          return result.meals.flatMap((m) => m.items)
+        })
+        const items = buildShoppingList(days, foods).reduce((acc, g) => acc + g.items.length, 0)
+        expect(items).toBeGreaterThanOrEqual(12)
+        expect(items).toBeLessThanOrEqual(30)
+      }
+    },
+  )
 })
 
 describe('plan de entrenamiento con la biblioteca real', () => {

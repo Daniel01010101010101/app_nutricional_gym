@@ -68,6 +68,8 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     css: false,
     restoreMocks: true,
+    // Las pruebas de pantallas usan IndexedDB simulada y eventos de usuario reales: en CI pueden tardar.
+    testTimeout: 20000,
     coverage: {
       provider: 'v8',
       include: ['src/domain/**/*.ts', 'src/data/**/*.ts'],

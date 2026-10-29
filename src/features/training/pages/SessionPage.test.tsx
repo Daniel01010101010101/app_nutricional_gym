@@ -5,35 +5,18 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { toDayKey } from '@/domain/shared/dates'
 import type { Repositories } from '@/data/repositories/types'
 import type { PlanDay, TrainingPlan } from '@/data/schemas'
-import { completeOnboarding } from '@/features/onboarding/complete'
-import { defaultOnboardingValues, type OnboardingValues } from '@/features/onboarding/model'
 import { newSet, startSession } from '@/services/workout'
 import { useCelebration } from '@/stores/celebration'
 import { useRestTimer } from '@/stores/restTimer'
-import { createTestRepositories, renderScreen } from '@/test/render'
+import { onboardedRepos } from '@/test/onboarding'
+import { renderScreen } from '@/test/render'
 
 import { SessionPage } from './SessionPage'
 
 const today = toDayKey(new Date())
 
-const values = (): OnboardingValues => ({
-  ...defaultOnboardingValues(),
-  name: 'Daniel',
-  sex: 'male',
-  age: 30,
-  heightCm: 178,
-  weight: 80,
-  neckCm: 38,
-  waistCm: 85,
-  jobType: 'sedentary',
-  avgSteps: 7000,
-  experience: 'intermediate',
-  acceptDisclaimer: true,
-})
-
 async function setup(): Promise<{ repos: Repositories; plan: TrainingPlan; day: PlanDay }> {
-  const { repos } = createTestRepositories()
-  await completeOnboarding(repos, values(), await repos.exercises.list(), today)
+  const repos = await onboardedRepos(today)
   const plan = (await repos.plans.getActive())!
   const day = plan.days.find((d) => d.exercises.some((e) => e.exerciseId === 'bench-press'))!
   return { repos, plan, day }

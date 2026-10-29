@@ -11,8 +11,15 @@ import {
   sumNutrients,
   type FoodPreferences,
 } from './foods'
-import { describePortion, leanProteinSources, nutritionGapMessage, remainingMacros } from './gaps'
-import { buildShoppingList, purchaseQuantity } from './shopping'
+import {
+  describePortion,
+  leanProteinSources,
+  nutritionGapMessage,
+  pluralizeMeasure,
+  pluralizeWord,
+  remainingMacros,
+} from './gaps'
+import { buildShoppingList, purchaseQuantity, singularUnit } from './shopping'
 import { findSwaps } from './swaps'
 
 const byId = (id: string) => FOODS.find((f) => f.id === id)!
@@ -127,6 +134,16 @@ describe('lista de mercado', () => {
 
   it('redondea hacia arriba a 50 g por debajo de 1 kg', () => {
     expect(purchaseQuantity(byId('rice'), 420)).toBe('450 g')
+  })
+
+  it('usa el singular cuando se compra una sola unidad', () => {
+    expect(purchaseQuantity(byId('egg'), 40)).toBe('1 huevo')
+    expect(singularUnit('litros')).toBe('litro')
+    expect(singularUnit('panes')).toBe('pan')
+    expect(singularUnit('paquetes de 250 g')).toBe('paquete de 250 g')
+    expect(singularUnit('tomates de árbol')).toBe('tomate de árbol')
+    expect(singularUnit('huevos (solo claras)')).toBe('huevo (solo claras)')
+    expect(singularUnit('maracuyás')).toBe('maracuyá')
   })
 
   it('convierte lo cocido a lo que hay que comprar en crudo o en seco', () => {
@@ -244,6 +261,23 @@ describe('lo que falta del día', () => {
     expect(describePortion(byId('egg'), 50)).toBe('1 unidad de huevo entero')
     expect(describePortion(byId('rice'), 320)).toBe('2 tazas de arroz blanco cocido')
     expect(describePortion(byId('olive-oil'), 13.5)).toBe('1 cucharada de aceite de oliva')
+  })
+
+  it('pluraliza medidas caseras con concordancia', () => {
+    expect(pluralizeWord('porción')).toBe('porciones')
+    expect(pluralizeWord('nuez')).toBe('nueces')
+    expect(pluralizeWord('bistec')).toBe('bistecs')
+    expect(pluralizeWord('filete')).toBe('filetes')
+    expect(pluralizeWord('unidad')).toBe('unidades')
+    expect(pluralizeMeasure('unidad mediana')).toBe('unidades medianas')
+    expect(pluralizeMeasure('lata pequeña escurrida')).toBe('latas pequeñas escurridas')
+    expect(pluralizeMeasure('taza picado')).toBe('tazas picado')
+    expect(pluralizeMeasure('taza en rodajas')).toBe('tazas en rodajas')
+    expect(pluralizeMeasure('porción (¼ de aguacate)')).toBe('porciones (¼ de aguacate)')
+    expect(pluralizeMeasure('filete mediano')).toBe('filetes medianos')
+    expect(pluralizeMeasure('botella personal')).toBe('botellas personales')
+    expect(pluralizeMeasure('plato hondo')).toBe('platos hondos')
+    expect(pluralizeMeasure('vaso grande lleno')).toBe('vasos grandes llenos')
     expect(describePortion(byId('egg'), 75)).toBe('1,5 unidades de huevo entero')
     expect(describePortion(byId('egg'), 1000)).toBe('1000 g de huevo entero')
     expect(describePortion(byId('chicken'), 203)).toBe('200 g de pechuga de pollo cocida')

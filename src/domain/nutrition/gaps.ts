@@ -27,8 +27,35 @@ export function remainingMacros(target: Macros, consumed: Macros): Macros {
 
 const COUNTABLE_MEASURES = /^1 (unidad|scoop|rebanada|tajada|taza|cucharada|vaso|lata|porción)/
 
-function pluralize(word: string): string {
-  return /[aeiou]$/.test(word) ? `${word}s` : `${word}es`
+export function pluralizeWord(word: string): string {
+  if (/[aeiouáéó]$/.test(word)) return `${word}s`
+  if (/ón$/.test(word)) return `${word.slice(0, -2)}ones`
+  if (/z$/.test(word)) return `${word.slice(0, -1)}ces`
+  if (/c$/.test(word)) return `${word}s`
+  return `${word}es`
+}
+
+const AGREEING_ADJECTIVE = /^(mediano|mediana|pequeño|pequeña|grande|personal)$/
+
+/**
+ * Plural de una medida casera: el sustantivo y los adjetivos que concuerdan con él
+ * ("lata pequeña escurrida" → "latas pequeñas escurridas"; "taza picado" → "tazas picado").
+ */
+export function pluralizeMeasure(label: string): string {
+  const rest = label.split(' ')
+  const head = rest.shift() as string
+  const gender = head.slice(-1)
+  const words = [pluralizeWord(head)]
+  let agreeing = true
+  for (const word of rest) {
+    agreeing =
+      agreeing &&
+      !word.startsWith('(') &&
+      (AGREEING_ADJECTIVE.test(word) ||
+        ((gender === 'a' || gender === 'o') && word.endsWith(gender)))
+    words.push(agreeing ? pluralizeWord(word) : word)
+  }
+  return words.join(' ')
 }
 
 /** Expresa gramos en una medida casera contable si queda cerca de un número de unidades; si no, en gramos. */
@@ -38,8 +65,8 @@ export function describePortion(food: Food, grams: number): string {
     const count = grams / measure.grams
     const rounded = Math.round(count * 2) / 2
     if (rounded >= 0.5 && rounded <= 6 && Math.abs(count - rounded) / count <= 0.2) {
-      const [unit = '', ...rest] = measure.label.replace(/^1 /, '').split(' ')
-      const label = [rounded > 1 ? pluralize(unit) : unit, ...rest].join(' ')
+      const unit = measure.label.replace(/^1 /, '')
+      const label = rounded > 1 ? pluralizeMeasure(unit) : unit
       return `${fmt(rounded, 1)} ${label} de ${food.name.toLowerCase()}`
     }
   }

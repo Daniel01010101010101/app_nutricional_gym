@@ -94,6 +94,7 @@ export interface MealPlanRepository {
   get(date: DayKey): Promise<MealPlanRecord | undefined>
   observe(date: DayKey): Observable<MealPlanRecord | undefined>
   listRange(from: DayKey, to: DayKey): Promise<MealPlanRecord[]>
+  observeRange(from: DayKey, to: DayKey): Observable<MealPlanRecord[]>
   save(plan: MealPlanRecord): Promise<void>
   saveMany(plans: MealPlanRecord[]): Promise<void>
   remove(date: DayKey): Promise<void>

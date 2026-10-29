@@ -38,12 +38,20 @@ const SECTION_ORDER: ShoppingSection[] = [
   'suplementos',
 ]
 
+/** Singular de una unidad de compra: "paquetes de 250 g" → "paquete de 250 g", "panes" → "pan". */
+export function singularUnit(label: string): string {
+  const rest = label.split(' ')
+  const head = rest.shift() as string
+  const singular = /[nlrd]es$/.test(head) ? head.slice(0, -2) : head.replace(/s$/, '')
+  return [singular, ...rest].join(' ')
+}
+
 export function purchaseQuantity(food: Food, cookedGrams: number): string {
   const grams = food.cooked ? cookedGrams / food.cooked.yield : cookedGrams
   const suffix = food.cooked ? ` (${food.cooked.buyAs})` : ''
   if (food.purchase) {
     const count = Math.ceil(roundDecimals(grams / food.purchase.grams, 3))
-    return `${count} ${food.purchase.label}${suffix}`
+    return `${count} ${count === 1 ? singularUnit(food.purchase.label) : food.purchase.label}${suffix}`
   }
   if (grams >= 1000) return `${fmt(ceilTo(grams / 1000, 0.1), 1)} kg${suffix}`
   return `${fmt(ceilTo(grams, 50))} g${suffix}`

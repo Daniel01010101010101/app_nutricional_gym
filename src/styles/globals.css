@@ -40,7 +40,7 @@
   --protein: #1c72c4;
   --carbs: #a77700;
   --fat: #7d44d6;
-  --water: #0b8b96;
+  --water: #008d9a;
 
   --chart-1: #e85a0c;
   --chart-2: #1c72c4;
@@ -74,11 +74,12 @@
   --input: #343943;
   --ring: #ff6b1a;
 
-  --kcal: #ff7a2e;
-  --protein: #5cb6ff;
-  --carbs: #f5c451;
-  --fat: #c597ff;
-  --water: #3fd8e2;
+  /* Mismos tonos validados que la paleta de gráficas (modo oscuro). */
+  --kcal: #ed6300;
+  --protein: #3a93e6;
+  --carbs: #b68b16;
+  --fat: #9a6cdf;
+  --water: #00a7ae;
 
   /* Paleta categórica validada (banda de luminosidad, daltonismo y contraste sobre #15171b). */
   --chart-1: #ed6300;

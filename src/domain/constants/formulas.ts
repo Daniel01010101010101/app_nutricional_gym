@@ -318,3 +318,16 @@ export const MEALS = {
   preWorkoutWindowHours: [1, 3],
   postWorkoutWindowHours: 2,
 } as const
+
+/**
+ * Rotación semanal: cuántos alimentos distintos por rol y momento del día se usan en la semana.
+ * Repetir alimentos facilita cocinar por tandas y deja una lista de mercado corta, sin perder
+ * variedad entre comidas.
+ */
+export const ROTATION = {
+  perSlot: { protein: 4, carb: 3, fat: 2, vegetable: 4, fruit: 3 },
+  /** Grasa máxima (g/100 g) para considerar "magro" un alimento del pre/post-entreno. */
+  leanFatPer100g: 10,
+  /** Proteína mínima (g/100 g) para una fuente principal de proteína. */
+  denseProteinPer100g: 10,
+} as const

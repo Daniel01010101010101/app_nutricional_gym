@@ -154,15 +154,13 @@ export function solveGrams(
 }
 
 /**
- * Desviación relativa frente al objetivo. Las kcal se comparan con Atwater (4/4/9) de los macros
- * planificados: así la tolerancia es coherente con los macros aunque cada tabla calcule la energía
- * de los alimentos con factores ligeramente distintos.
+ * Desviación relativa frente al objetivo. Las kcal son las de las tablas de composición (las mismas
+ * que suma el diario), que incluyen la energía de la fibra: así comer el menú da el total que se ve.
  */
 function deviationOf(totals: Macros, target: Macros): MacroDeviation {
   const rel = (a: number, t: number) => (t === 0 ? 0 : roundDecimals((a - t) / t, 4))
-  const atwater = (m: Macros) => m.protein * 4 + m.carbs * 4 + m.fat * 9
   return {
-    kcal: rel(atwater(totals), atwater(target)),
+    kcal: rel(totals.kcal, target.kcal),
     protein: rel(totals.protein, target.protein),
     carbs: rel(totals.carbs, target.carbs),
     fat: rel(totals.fat, target.fat),

@@ -51,3 +51,17 @@ export function elapsedClock(startIso: string, now: number): string {
     ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
     : `${m}:${String(s).padStart(2, '0')}`
 }
+
+/** "2 × filete mediano" a partir de una medida casera ("1 filete mediano") y una cantidad. */
+export function formatMeasure(label: string, quantity: number): string {
+  return `${fmt(quantity, 2)} × ${label.replace(/^1 /, '')}`
+}
+
+/** Días relativos en español: Hoy, Ayer, Mañana o la fecha. */
+export function relativeDayLabel(key: DayKey, today: DayKey): string {
+  const diff = Math.round((parseDayKey(key).getTime() - parseDayKey(today).getTime()) / 86400000)
+  if (diff === 0) return 'Hoy'
+  if (diff === -1) return 'Ayer'
+  if (diff === 1) return 'Mañana'
+  return capitalize(formatDay(key, "EEEE d 'de' MMM"))
+}
