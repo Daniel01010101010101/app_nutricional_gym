@@ -8,7 +8,7 @@ import type { WorkoutSet } from '../types'
 import { suggestNextTarget, type SessionSets } from './doubleProgression'
 import { bestE1rm, epley, estimateOneRepMax, explainE1rm, weightForReps } from './e1rm'
 import { computeBests, detectRecords } from './records'
-import { strengthLossAlert, strengthTrend, trendSeries } from './strength'
+import { overallStrengthTrend, strengthLossAlert, strengthTrend, trendSeries } from './strength'
 import { summarizeSession } from './summary'
 
 const w = (weightKg: number, reps: number, rir: number | null = 2, isWarmup = false) => ({
@@ -185,6 +185,18 @@ describe('progresión doble', () => {
       history: [session('2026-01-01', [w(40, 10, 3, true)])],
     })
     expect(value.action).toBe('find')
+  })
+})
+
+describe('tendencia global de fuerza', () => {
+  it('resume el estado de los básicos', () => {
+    expect(overallStrengthTrend([])).toBe('insufficient')
+    expect(overallStrengthTrend(['insufficient', 'insufficient'])).toBe('insufficient')
+    expect(overallStrengthTrend(['up', 'up', 'stable'])).toBe('up')
+    expect(overallStrengthTrend(['up', 'stable'])).toBe('stable')
+    expect(overallStrengthTrend(['down', 'down', 'up', 'up', 'up'])).toBe('down')
+    expect(overallStrengthTrend(['down', 'stable'])).toBe('down')
+    expect(overallStrengthTrend(['down', 'up', 'up', 'insufficient'])).toBe('up')
   })
 })
 

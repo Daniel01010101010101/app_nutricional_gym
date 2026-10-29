@@ -105,3 +105,17 @@ export function strengthLossAlert(
     },
   )
 }
+
+/**
+ * Tendencia global de los básicos: "bajando" si caen dos o más (o más de los que suben),
+ * "subiendo" si suben la mayoría; si no, "estable". Sin datos en ningún básico, "insuficiente".
+ */
+export function overallStrengthTrend(states: readonly TrendState[]): TrendState {
+  const known = states.filter((s) => s !== 'insufficient')
+  if (known.length === 0) return 'insufficient'
+  const up = known.filter((s) => s === 'up').length
+  const down = known.filter((s) => s === 'down').length
+  if (down >= STRENGTH_TREND.alertMinLifts || down > up) return 'down'
+  if (up > known.length / 2) return 'up'
+  return 'stable'
+}

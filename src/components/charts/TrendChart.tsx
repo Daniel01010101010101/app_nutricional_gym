@@ -24,6 +24,8 @@ export interface TrendSeries {
   color: string
   /** Muestra cada punto (mediciones reales) además de la línea. */
   dots?: boolean
+  /** Solo los puntos, sin línea (p. ej. el peso diario junto a su promedio). */
+  dotsOnly?: boolean
   /** Lavado del área bajo la línea (~10 %). Solo para la serie principal. */
   area?: boolean
 }
@@ -60,7 +62,11 @@ function TrendTooltip({
         if (typeof value !== 'number') return null
         return (
           <p key={s.key} className="flex items-center gap-2">
-            <span aria-hidden className="h-0.5 w-3 rounded-full" style={{ background: s.color }} />
+            <span
+              aria-hidden
+              className={s.dotsOnly ? 'size-2 rounded-full' : 'h-0.5 w-3 rounded-full'}
+              style={{ background: s.color }}
+            />
             <strong className="tabular text-sm text-foreground">{formatValue(value)}</strong>
             <span className="text-muted-foreground">{s.label}</span>
           </p>
@@ -94,7 +100,7 @@ export function TrendChart({
             <span key={s.key} className="flex items-center gap-1.5">
               <span
                 aria-hidden
-                className="h-0.5 w-4 rounded-full"
+                className={s.dotsOnly ? 'size-2 rounded-full' : 'h-0.5 w-4 rounded-full'}
                 style={{ background: s.color }}
               />
               {s.label}
@@ -189,13 +195,13 @@ export function TrendChart({
                 dataKey={s.key}
                 type="monotone"
                 stroke={s.color}
-                strokeWidth={2}
+                strokeWidth={s.dotsOnly ? 0 : 2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 connectNulls
                 isAnimationActive={false}
                 dot={
-                  s.dots
+                  s.dots || s.dotsOnly
                     ? { r: 3.5, fill: s.color, stroke: 'var(--card)', strokeWidth: 2 }
                     : (props: { cx?: number; cy?: number; index?: number }) =>
                         props.index === points.length - 1 &&
