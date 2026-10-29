@@ -32,6 +32,7 @@ import type {
 } from '@/domain/types'
 import { newId, nowIso } from '@/data/defaults'
 import type {
+  Checkin,
   PlanDay,
   PlanExercise,
   Profile,
@@ -392,6 +393,16 @@ export function lowFeelingStreak(sessions: readonly WorkoutSession[]): number {
   let streak = 0
   for (const s of [...sessions].filter((x) => x.status === 'completed').reverse()) {
     if (s.feeling !== null && s.feeling <= 2) streak++
+    else break
+  }
+  return streak
+}
+
+/** Check-ins seguidos (desde el último) con sueño o energía ≤ 2. */
+export function lowWellbeingStreak(checkins: readonly Checkin[]): number {
+  let streak = 0
+  for (const c of [...checkins].sort((a, b) => b.weekStart.localeCompare(a.weekStart))) {
+    if (c.sleep <= 2 || c.energy <= 2) streak++
     else break
   }
   return streak

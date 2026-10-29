@@ -47,6 +47,7 @@ import { dayStatuses, greeting, nextPlanMeal } from '@/services/today'
 import {
   deloadInfo,
   lowFeelingStreak,
+  lowWellbeingStreak,
   mainLiftSeries,
   planDayFor,
   startSession,
@@ -215,7 +216,7 @@ export function TodayPage() {
   const deload = plan
     ? deloadInfo(plan, settings, today, {
         strengthAlert: alert.value.triggered,
-        lowWellbeingCheckins: 0,
+        lowWellbeingCheckins: lowWellbeingStreak(checkins.data ?? []),
         lowFeelingSessions: lowFeelingStreak(training.sessions),
       })
     : null

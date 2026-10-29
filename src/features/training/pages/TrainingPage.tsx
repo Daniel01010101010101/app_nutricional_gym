@@ -51,6 +51,7 @@ import {
   blockStartForDeloadNow,
   deloadInfo,
   lowFeelingStreak,
+  lowWellbeingStreak,
   mainLiftSeries,
   planDayFor,
   startSession,
@@ -117,17 +118,9 @@ export function TrainingPage() {
     )
   }
 
-  const lowWellbeing = (() => {
-    let n = 0
-    for (const c of [...(checkins.data ?? [])].reverse()) {
-      if (c.sleep <= 2 || c.energy <= 2) n++
-      else break
-    }
-    return n
-  })()
   const deload = deloadInfo(plan, settings, today, {
     strengthAlert: alert.value.triggered,
-    lowWellbeingCheckins: lowWellbeing,
+    lowWellbeingCheckins: lowWellbeingStreak(checkins.data ?? []),
     lowFeelingSessions: lowFeelingStreak(data.sessions),
   })
 

@@ -41,7 +41,13 @@ import type {
 
 import { isTrainingDayFor, totalsOf } from './nutrition'
 import { healthOf } from './profile'
-import { deloadInfo, historyByExercise, lowFeelingStreak, mainLiftSeries } from './workout'
+import {
+  deloadInfo,
+  historyByExercise,
+  lowFeelingStreak,
+  lowWellbeingStreak,
+  mainLiftSeries,
+} from './workout'
 
 /** Objetivos vigentes en una fecha a partir del historial (el más reciente con inicio ≤ fecha). */
 export function targetsAt(
@@ -211,20 +217,10 @@ export async function checkinStats(
     Object.values(series).map((points) => strengthTrend(points).state),
   )
 
-  const lowWellbeing = (() => {
-    let n = 0
-    for (const c of [...checkins]
-      .sort((a, b) => a.weekStart.localeCompare(b.weekStart))
-      .reverse()) {
-      if (c.sleep <= 2 || c.energy <= 2) n++
-      else break
-    }
-    return n
-  })()
   const deloadDue = plan
     ? deloadInfo(plan, settings, today, {
         strengthAlert: alert,
-        lowWellbeingCheckins: lowWellbeing,
+        lowWellbeingCheckins: lowWellbeingStreak(checkins),
         lowFeelingSessions: lowFeelingStreak(sessions),
       }).value.due
     : false
