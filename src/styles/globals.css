@@ -1,0 +1,202 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/inter';
+@import '@fontsource/barlow-condensed/600.css';
+@import '@fontsource/barlow-condensed/700.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Tokens de diseño de FORJA.
+ * Tema oscuro por defecto (clase .dark en <html>), acento naranja "brasa".
+ * Los pares texto/fondo están elegidos para cumplir contraste AA (≥ 4.5:1).
+ */
+:root {
+  --radius: 0.875rem;
+
+  --background: #f6f6f7;
+  --foreground: #111317;
+  --card: #ffffff;
+  --card-foreground: #111317;
+  --popover: #ffffff;
+  --popover-foreground: #111317;
+  --primary: #ff6b1a;
+  --primary-foreground: #1a0c03;
+  --primary-text: #b93f06;
+  --secondary: #eceef1;
+  --secondary-foreground: #111317;
+  --muted: #eceef1;
+  --muted-foreground: #565d6a;
+  --accent: #e6e8ec;
+  --accent-foreground: #111317;
+  --destructive: #c8282e;
+  --success: #0f7a52;
+  --warning: #9a6200;
+  --border: #dfe2e7;
+  --input: #d5d9df;
+  --ring: #ff6b1a;
+
+  --kcal: #e85a0c;
+  --protein: #1c72c4;
+  --carbs: #a77700;
+  --fat: #7d44d6;
+  --water: #0b8b96;
+
+  --chart-1: #e85a0c;
+  --chart-2: #1c72c4;
+  --chart-3: #a77700;
+  --chart-4: #7d44d6;
+  --chart-5: #0f7a52;
+
+  --nav-height: 4.25rem;
+}
+
+.dark {
+  --background: #0c0d0f;
+  --foreground: #f3f4f6;
+  --card: #15171b;
+  --card-foreground: #f3f4f6;
+  --popover: #1b1e23;
+  --popover-foreground: #f3f4f6;
+  --primary: #ff6b1a;
+  --primary-foreground: #1a0c03;
+  --primary-text: #ff8a4a;
+  --secondary: #23262c;
+  --secondary-foreground: #f3f4f6;
+  --muted: #1d2025;
+  --muted-foreground: #a3a9b5;
+  --accent: #272b32;
+  --accent-foreground: #f3f4f6;
+  --destructive: #f2555a;
+  --success: #3ddc97;
+  --warning: #f8c04a;
+  --border: #2a2e36;
+  --input: #343943;
+  --ring: #ff6b1a;
+
+  --kcal: #ff7a2e;
+  --protein: #5cb6ff;
+  --carbs: #f5c451;
+  --fat: #c597ff;
+  --water: #3fd8e2;
+
+  --chart-1: #ff7a2e;
+  --chart-2: #5cb6ff;
+  --chart-3: #f5c451;
+  --chart-4: #c597ff;
+  --chart-5: #3ddc97;
+}
+
+@theme inline {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Barlow Condensed', 'Inter Variable', ui-sans-serif, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: calc(var(--radius) - 2px);
+  --radius-xl: var(--radius);
+  --radius-2xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-text: var(--primary-text);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-kcal: var(--kcal);
+  --color-protein: var(--protein);
+  --color-carbs: var(--carbs);
+  --color-fat: var(--fat);
+  --color-water: var(--water);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --animate-pop: pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply min-h-dvh bg-background font-sans text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+    overscroll-behavior-y: none;
+  }
+
+  /* Números alineados en tablas y métricas. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}

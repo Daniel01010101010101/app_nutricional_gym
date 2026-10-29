@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="theme-color" content="#0c0d0f" />
+    <meta
+      name="description"
+      content="FORJA: entrenamiento y nutrición basados en evidencia para bajar grasa sin perder fuerza."
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="FORJA" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <title>FORJA — Entreno y nutrición</title>
+    <script>
+      // Aplica el tema guardado antes del primer pintado para evitar parpadeos.
+      try {
+        var saved = JSON.parse(localStorage.getItem('forja-theme') || '{}')
+        var pref = (saved.state && saved.state.preference) || 'dark'
+        var light =
+          pref === 'light' ||
+          (pref === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches)
+        if (light) document.documentElement.classList.remove('dark')
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>FORJA necesita JavaScript para funcionar.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
