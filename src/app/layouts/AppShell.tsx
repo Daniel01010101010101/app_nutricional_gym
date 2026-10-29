@@ -1,7 +1,10 @@
 import { Outlet, useLocation } from 'react-router'
 
+import { CelebrationOverlay } from '@/components/common/CelebrationOverlay'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { SideNav } from '@/components/layout/SideNav'
+import { ActiveSessionPill } from '@/features/training/components/ActiveSessionPill'
+import { RestTimerBar } from '@/features/training/components/RestTimerBar'
 
 export function AppShell() {
   const location = useLocation()
@@ -9,6 +12,7 @@ export function AppShell() {
     <div className="flex min-h-dvh">
       <SideNav />
       <div className="flex min-w-0 flex-1 flex-col">
+        <ActiveSessionPill />
         <main
           key={location.pathname.split('/')[1]}
           id="contenido"
@@ -17,7 +21,9 @@ export function AppShell() {
           <Outlet />
         </main>
       </div>
+      <RestTimerBar />
       <BottomNav />
+      <CelebrationOverlay />
     </div>
   )
 }

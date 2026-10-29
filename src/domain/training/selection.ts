@@ -47,6 +47,28 @@ const LOAD_PREFERENCE: Record<LoadType, number> = {
   fixed: 3,
 }
 
+/**
+ * En secundarios y accesorios se prefieren cargas fáciles de ajustar y progresar en pasos pequeños
+ * (mancuerna, máquina, polea). Peso corporal y bandas quedan como opción cuando no hay equipo:
+ * su carga no se puede subir de forma precisa. En secundarios la barra suma un poco para dar variedad
+ * frente al básico del día.
+ */
+const SECONDARY_LOAD_PENALTY: Record<LoadType, number> = {
+  barbell: 6,
+  dumbbell: 0,
+  stack: 0,
+  bodyweight: 12,
+  fixed: 16,
+}
+
+const ACCESSORY_LOAD_PENALTY: Record<LoadType, number> = {
+  stack: 0,
+  dumbbell: 1,
+  barbell: 3,
+  bodyweight: 12,
+  fixed: 16,
+}
+
 /** Puntaje (menor = mejor) de un ejercicio para un hueco del plan. */
 export function slotScore(
   exercise: Exercise,
@@ -63,11 +85,11 @@ export function slotScore(
     score += LOAD_PREFERENCE[exercise.loadType] * 5
   } else if (slot.role === 'secondary') {
     score += exercise.kind === 'compound' ? 0 : 30
-    // Variedad: en secundarios preferimos mancuerna o máquina sobre barra.
-    score += exercise.loadType === 'barbell' ? 6 : 0
+    score += SECONDARY_LOAD_PENALTY[exercise.loadType]
     score += exercise.mainLift ? 8 : 0
   } else {
     score += exercise.kind === 'isolation' ? 0 : 10
+    score += ACCESSORY_LOAD_PENALTY[exercise.loadType]
     if (slot.muscle && exercise.primaryMuscle !== slot.muscle) score += 20
   }
   if (weekUsed.has(exercise.id)) score += 15

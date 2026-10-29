@@ -8,6 +8,7 @@ import {
   plateBreakdown,
   reducedLoadable,
   roundToLoadable,
+  warmupRamp,
   type LoadingSettings,
 } from './loading'
 
@@ -98,5 +99,38 @@ describe('discos por lado', () => {
       unit: 'kg',
       remainderKg: 10,
     })
+  })
+})
+
+describe('rampa de calentamiento', () => {
+  it('en barra: barra vacía y escalones al 50, 70 y 85 %', () => {
+    expect(warmupRamp(100, 'barbell', DEFAULT_LOADING)).toEqual([
+      { weightKg: 20, reps: 10 },
+      { weightKg: 50, reps: 8 },
+      { weightKg: 70, reps: 5 },
+      { weightKg: 85, reps: 2 },
+    ])
+  })
+
+  it('omite escalones repetidos o iguales al peso de trabajo', () => {
+    expect(warmupRamp(30, 'barbell', DEFAULT_LOADING)).toEqual([
+      { weightKg: 20, reps: 10 },
+      { weightKg: 25, reps: 2 },
+    ])
+    expect(warmupRamp(20, 'barbell', DEFAULT_LOADING)).toEqual([])
+  })
+
+  it('con mancuernas o máquina no hay barra vacía', () => {
+    expect(warmupRamp(30, 'dumbbell', DEFAULT_LOADING)).toEqual([
+      { weightKg: 14, reps: 8 },
+      { weightKg: 20, reps: 5 },
+      { weightKg: 24, reps: 2 },
+    ])
+  })
+
+  it('sin peso de trabajo o con peso corporal no sugiere nada', () => {
+    expect(warmupRamp(0, 'barbell', DEFAULT_LOADING)).toEqual([])
+    expect(warmupRamp(20, 'bodyweight', DEFAULT_LOADING)).toEqual([])
+    expect(warmupRamp(20, 'fixed', DEFAULT_LOADING)).toEqual([])
   })
 })

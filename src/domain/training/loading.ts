@@ -1,3 +1,4 @@
+import { WARMUP_RAMP } from '../constants/formulas'
 import { roundDecimals } from '../shared/math'
 import { toKg } from '../shared/units'
 import type { LoadType, WeightUnit } from '../types'
@@ -163,4 +164,36 @@ export function plateBreakdown(totalKg: number, settings: LoadingSettings): Plat
     unit: settings.plates.unit,
     remainderKg: roundDecimals(perSide * unitKg * 2, 2),
   }
+}
+
+export interface WarmupSet {
+  weightKg: number
+  reps: number
+}
+
+/**
+ * Series de calentamiento sugeridas antes de un peso de trabajo, redondeadas a lo cargable.
+ * Se omiten los escalones que no sean más pesados que el anterior o que igualen el de trabajo.
+ */
+export function warmupRamp(
+  workingKg: number,
+  loadType: LoadType,
+  settings: LoadingSettings,
+): WarmupSet[] {
+  if (workingKg <= 0 || loadType === 'bodyweight' || loadType === 'fixed') return []
+  const sets: WarmupSet[] = []
+  let previous = 0
+  if (loadType === 'barbell') {
+    const barKg = roundDecimals(toKg(settings.bar.value, settings.bar.unit), 2)
+    if (workingKg <= barKg + 1e-9) return []
+    sets.push({ weightKg: barKg, reps: WARMUP_RAMP.barReps })
+    previous = barKg
+  }
+  for (const step of WARMUP_RAMP.steps) {
+    const weightKg = roundToLoadable(workingKg * step.pct, loadType, settings, 'down')
+    if (weightKg <= previous + 1e-9 || weightKg >= workingKg - 1e-9) continue
+    sets.push({ weightKg, reps: step.reps })
+    previous = weightKg
+  }
+  return sets
 }

@@ -40,3 +40,14 @@ export function formatDuration(minutes: number): string {
   const m = minutes % 60
   return m === 0 ? `${h} h` : `${h} h ${m} min`
 }
+
+/** Tiempo transcurrido desde `startIso` como m:ss o h:mm:ss. */
+export function elapsedClock(startIso: string, now: number): string {
+  const total = Math.max(0, Math.floor((now - new Date(startIso).getTime()) / 1000))
+  const h = Math.floor(total / 3600)
+  const m = Math.floor((total % 3600) / 60)
+  const s = total % 60
+  return h > 0
+    ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+    : `${m}:${String(s).padStart(2, '0')}`
+}

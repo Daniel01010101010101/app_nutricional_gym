@@ -7,7 +7,9 @@ import type {
   ExperienceLevel,
   JobType,
   Joint,
+  LoadType,
   MainLift,
+  MovementPattern,
   WeightUnit,
 } from '@/domain/types'
 
@@ -94,3 +96,35 @@ export const MAIN_LIFT_EXERCISE_LABEL: Record<MainLift, string> = {
 }
 
 export const UNIT_LABEL: Record<WeightUnit, string> = { kg: 'kg', lb: 'lb' }
+
+export const PATTERN_LABEL: Record<MovementPattern, string> = {
+  squat: 'Sentadilla',
+  hinge: 'Bisagra de cadera',
+  lunge: 'Zancada',
+  'horizontal-push': 'Empuje horizontal',
+  'vertical-push': 'Empuje vertical',
+  'horizontal-pull': 'Jalón horizontal (remo)',
+  'vertical-pull': 'Jalón vertical',
+  'chest-fly': 'Aperturas de pecho',
+  'lateral-raise': 'Elevación lateral',
+  'rear-delt': 'Deltoide posterior',
+  'elbow-flexion': 'Flexión de codo (bíceps)',
+  'elbow-extension': 'Extensión de codo (tríceps)',
+  'knee-extension': 'Extensión de rodilla',
+  'knee-flexion': 'Flexión de rodilla (femoral)',
+  'hip-thrust': 'Empuje de cadera',
+  'hip-abduction': 'Abducción de cadera',
+  'calf-raise': 'Pantorrilla',
+  'core-flexion': 'Flexión de tronco',
+  'core-stability': 'Estabilidad de core',
+  shrug: 'Encogimientos',
+  carry: 'Cargadas / paseos',
+}
+
+export const LOAD_TYPE_LABEL: Record<LoadType, string> = {
+  barbell: 'Barra con discos',
+  dumbbell: 'Mancuernas',
+  stack: 'Máquina o polea',
+  bodyweight: 'Peso corporal (+ lastre)',
+  fixed: 'Peso fijo (kettlebell, banda…)',
+}

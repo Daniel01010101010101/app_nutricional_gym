@@ -140,4 +140,25 @@ describe('plan de entrenamiento con la biblioteca real', () => {
     expect(ids).not.toContain('deadlift')
     expect(ids).not.toContain('barbell-row')
   })
+
+  it('en gimnasio prefiere cargas progresables a bandas o variantes sin carga', () => {
+    // IndexedDB devuelve el catálogo ordenado por id: el orden no debe decidir la calidad del plan.
+    const sorted = [...EXERCISES_DATA].sort((a, b) => a.id.localeCompare(b.id))
+    const { value } = generateTrainingPlan({
+      experience: 'intermediate',
+      daysPerWeek: 4,
+      availableWeekdays: [1, 2, 4, 5],
+      sessionMinutes: 60,
+      equipment: EQUIPMENT_PRESETS.gym,
+      injuries: [],
+      excludedExerciseIds: [],
+      priorityMuscles: [],
+      exercises: sorted,
+    })
+    const byId = new Map(sorted.map((e) => [e.id, e]))
+    const chosen = value.days.flatMap((d) => d.exercises.map((e) => byId.get(e.exerciseId)!))
+    expect(chosen.filter((e) => e.loadType === 'fixed').map((e) => e.id)).toEqual([])
+    expect(chosen.map((e) => e.id)).not.toContain('assisted-pull-up')
+    expect(chosen.map((e) => e.id)).not.toContain('pike-push-up')
+  })
 })

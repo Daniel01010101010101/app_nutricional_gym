@@ -9,7 +9,7 @@ export function defaultSettings(now: string): Settings {
     unit: 'kg',
     checkinWeekday: 1,
     loading: structuredClone(DEFAULT_LOADING),
-    restSeconds: { main: 180, secondary: 150, accessory: 90 },
+    restSeconds: { main: 180, secondary: 120, accessory: 75 },
     timerSound: true,
     timerVibration: true,
     autoStartTimer: true,

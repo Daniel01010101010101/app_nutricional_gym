@@ -229,6 +229,19 @@ export const PRESCRIPTIONS = {
 export const SECONDS_PER_SET = 40
 export const WARMUP_MINUTES = 8
 
+/**
+ * Rampa de calentamiento para ejercicios compuestos: series progresivas de pocas reps
+ * que preparan sin fatigar (barra vacía → ~50 % → ~70 % → ~85 % del peso de trabajo).
+ */
+export const WARMUP_RAMP = {
+  barReps: 10,
+  steps: [
+    { pct: 0.5, reps: 8 },
+    { pct: 0.7, reps: 5 },
+    { pct: 0.85, reps: 2 },
+  ],
+} as const
+
 /* ───────────────────────────── Progresión ───────────────────────────── */
 
 export const EPLEY = {

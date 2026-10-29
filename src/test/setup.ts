@@ -26,6 +26,7 @@ if (typeof window !== 'undefined') {
   Element.prototype.scrollIntoView ??= () => undefined
   Element.prototype.hasPointerCapture ??= () => false
   Element.prototype.releasePointerCapture ??= () => undefined
+  Element.prototype.setPointerCapture ??= () => undefined
 }
 
 afterEach(() => {
