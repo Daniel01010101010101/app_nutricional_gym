@@ -204,6 +204,11 @@ export interface Food {
   section: ShoppingSection
   /** Unidad de compra para la lista de mercado (p. ej. huevo = 1 unidad de 50 g). */
   purchase?: { label: string; grams: number }
+  /**
+   * Rendimiento de cocción: gramos cocidos por gramo comprado (p. ej. arroz 2.4, pollo 0.75).
+   * La lista de mercado lo usa para decir cuánto comprar en crudo o en seco.
+   */
+  cooked?: { yield: number; buyAs: 'crudo' | 'en seco' }
   source: string
   isCustom?: boolean
 }

@@ -53,7 +53,12 @@ const IMPORTANCE = { kcal: 1, protein: 2, carbs: 1, fat: 1 } as const
 
 type Template = MealRole[]
 
-function templateFor(meal: MealTarget): Template {
+/** Por encima de esta proteína por comida se combinan dos fuentes (p. ej. pollo + fríjol, huevos + claras). */
+const SECOND_PROTEIN_ABOVE = 30
+/** Comidas con muchos carbos combinan dos fuentes (p. ej. arroz + plátano). */
+const SECOND_CARB_ABOVE = 90
+
+function baseTemplate(meal: MealTarget): Template {
   if (meal.isPreWorkout) return ['protein', 'carb']
   switch (meal.kind) {
     case 'breakfast':
@@ -66,6 +71,15 @@ function templateFor(meal: MealTarget): Template {
   }
 }
 
+export function templateFor(meal: MealTarget): Template {
+  const template = baseTemplate(meal)
+  const isMainMeal = meal.kind !== 'snack'
+  const extra: Template = []
+  if (isMainMeal && meal.target.protein > SECOND_PROTEIN_ABOVE) extra.push('protein')
+  if (meal.target.carbs > SECOND_CARB_ABOVE) extra.push('carb')
+  return [...extra, ...template]
+}
+
 export function candidatesFor(foods: readonly Food[], role: MealRole, meal: MealTarget): Food[] {
   const base = foods.filter((f) => f.roles.includes(role) && f.slots.includes(meal.kind))
   if ((meal.isPreWorkout || meal.isPostWorkout) && (role === 'protein' || role === 'carb')) {
@@ -75,13 +89,24 @@ export function candidatesFor(foods: readonly Food[], role: MealRole, meal: Meal
   return base
 }
 
+/**
+ * Paso de porción: medio scoop de proteína, unidades enteras pequeñas (huevos) o medias unidades
+ * grandes (arepas); el resto, de 5 en 5 g (10 g en porciones grandes).
+ */
 export function portionStep(food: Food, grams: number): number {
-  const unit = food.measures.find(
-    (m) => m.label.startsWith('1 unidad') || m.label.startsWith('1 scoop'),
-  )
-  if (unit && unit.grams <= 80) return unit.grams
+  const scoop = food.measures.find((m) => m.label.startsWith('1 scoop'))
+  if (scoop) return scoop.grams / 2
+  const unit = food.measures.find((m) => m.label.startsWith('1 unidad'))
+  if (unit && unit.grams <= 80) return unit.grams >= 60 ? unit.grams / 2 : unit.grams
   return grams > 150 ? 10 : 5
 }
+
+/** Fuente principal de proteína: al menos 10 g por 100 g (las leguminosas y la leche acompañan). */
+const PRIMARY_PROTEIN_MIN = 10
+/** "Magra": como máximo 0,3 g de grasa por gramo de proteína. */
+const LEAN_FAT_PER_PROTEIN = 0.3
+/** La grasa de la comida es ajustada si es menor al 40 % de la proteína (en gramos). */
+const TIGHT_FAT_RATIO = 0.4
 
 /** Gramos máximos de un alimento en una comida según el tope de su macro principal. */
 export function maxGramsFor(food: Food, role: SolvedRole): number {
@@ -90,7 +115,7 @@ export function maxGramsFor(food: Food, role: SolvedRole): number {
   return density > 0 ? Math.min(ABSOLUTE_MAX_GRAMS, cap.max / density) : ABSOLUTE_MAX_GRAMS
 }
 
-interface Variable {
+export interface Variable {
   food: Food
   role: MealRole
   lo: number
@@ -128,22 +153,32 @@ export function solveGrams(
   }
 }
 
+/**
+ * Desviación relativa frente al objetivo. Las kcal se comparan con Atwater (4/4/9) de los macros
+ * planificados: así la tolerancia es coherente con los macros aunque cada tabla calcule la energía
+ * de los alimentos con factores ligeramente distintos.
+ */
 function deviationOf(totals: Macros, target: Macros): MacroDeviation {
   const rel = (a: number, t: number) => (t === 0 ? 0 : roundDecimals((a - t) / t, 4))
+  const atwater = (m: Macros) => m.protein * 4 + m.carbs * 4 + m.fat * 9
   return {
-    kcal: rel(totals.kcal, target.kcal),
+    kcal: rel(atwater(totals), atwater(target)),
     protein: rel(totals.protein, target.protein),
     carbs: rel(totals.carbs, target.carbs),
     fat: rel(totals.fat, target.fat),
   }
 }
 
+/** Error a minimizar: cuadrático y con una penalización fuerte por salirse de la tolerancia. */
 function errorOf(d: MacroDeviation): number {
+  const tolerance = MEALS.planTolerance * 0.9
+  const outside = (x: number) => Math.max(0, Math.abs(x) - tolerance) ** 2
   return (
     IMPORTANCE.kcal * d.kcal ** 2 +
     IMPORTANCE.protein * d.protein ** 2 +
     IMPORTANCE.carbs * d.carbs ** 2 +
-    IMPORTANCE.fat * d.fat ** 2
+    IMPORTANCE.fat * d.fat ** 2 +
+    100 * (outside(d.kcal) + outside(d.protein) + outside(d.carbs) + outside(d.fat))
   )
 }
 
@@ -187,12 +222,25 @@ function buildMeal(
   const variables: Variable[] = []
   const fixed: PlanItem[] = []
 
+  let proteinPicks = 0
   for (const role of templateFor(meal)) {
-    const all = candidatesFor(foods, role, meal)
+    const isPrimaryProtein = role === 'protein' && proteinPicks === 0
+    const candidates = candidatesFor(foods, role, meal).filter(
+      (f) => !variables.some((v) => v.food.id === f.id),
+    )
+    const dense = candidates.filter((f) => f.per100g.protein >= PRIMARY_PROTEIN_MIN)
+    // Con poca grasa disponible en la comida, la proteína principal debe ser magra.
+    const lean = dense.filter((f) => f.per100g.fat <= f.per100g.protein * LEAN_FAT_PER_PROTEIN)
+    const preferred =
+      meal.target.fat < meal.target.protein * TIGHT_FAT_RATIO && lean.length > 0 ? lean : dense
+    const all = isPrimaryProtein && preferred.length > 0 ? preferred : candidates
     const fresh = role === 'protein' ? all.filter((f) => !usedProteins.has(f.id)) : all
     const food = pick(fresh.length > 0 ? fresh : all, random)
     if (!food) continue
-    if (role === 'protein') usedProteins.add(food.id)
+    if (role === 'protein') {
+      usedProteins.add(food.id)
+      proteinPicks++
+    }
     if (isFixedRole(role)) {
       fixed.push({ foodId: food.id, grams: FIXED_PORTION[role], role })
     } else {
@@ -231,6 +279,61 @@ function itemsOf(built: BuiltMeal): PlanItem[] {
   ]
 }
 
+interface Move {
+  v: Variable
+  delta: number
+}
+
+function shifted(totals: Macros, moves: readonly Move[]): Macros {
+  const next = { ...totals }
+  for (const { v, delta } of moves) {
+    for (const key of ['kcal', ...MACRO_KEYS] as const)
+      next[key] += (v.food.per100g[key] * delta) / 100
+  }
+  return next
+}
+
+function candidateMoves(variables: readonly Variable[]): Move[] {
+  return variables.flatMap((v) => {
+    const step = portionStep(v.food, v.grams || 50)
+    return [step, -step]
+      .filter((delta) => v.grams + delta >= 0 && v.grams + delta <= v.hi)
+      .map((delta) => ({ v, delta }))
+  })
+}
+
+/**
+ * Ajuste fino del día: mueve porciones de a un paso (o dos a la vez si un solo cambio no mejora)
+ * mientras el error baje, hasta quedar dentro de la tolerancia.
+ */
+export function fineTune(variables: readonly Variable[], start: Macros, target: Macros): void {
+  let totals = start
+  let error = errorOf(deviationOf(totals, target))
+  for (let iter = 0; iter < 150 && !isWithinTolerance(deviationOf(totals, target)); iter++) {
+    const singles = candidateMoves(variables)
+    let best: { moves: Move[]; error: number } | null = null
+    for (const move of singles) {
+      const e = errorOf(deviationOf(shifted(totals, [move]), target))
+      if (!best || e < best.error) best = { moves: [move], error: e }
+    }
+    if (!best || best.error >= error) {
+      for (let i = 0; i < singles.length; i++) {
+        for (let j = i + 1; j < singles.length; j++) {
+          const a = singles[i] as Move
+          const b = singles[j] as Move
+          if (a.v === b.v) continue
+          const e = errorOf(deviationOf(shifted(totals, [a, b]), target))
+          if (!best || e < best.error) best = { moves: [a, b], error: e }
+        }
+      }
+    }
+    if (!best || best.error >= error) return
+    for (const { v, delta } of best.moves) v.grams += delta
+    totals = shifted(totals, best.moves)
+    error = best.error
+  }
+}
+
 export interface GenerateDayPlanInput {
   meals: readonly MealTarget[]
   /** Alimentos ya filtrados por restricciones, gustos y presupuesto. */
@@ -243,42 +346,21 @@ export interface GenerateDayPlanInput {
  * Genera el menú del día: elige alimentos por plantilla de comida, optimiza gramos y
  * hace un ajuste fino a nivel de día para quedar dentro de ±5 % en kcal y macros.
  */
-export function generateDayPlan({
-  meals,
-  foods,
-  dayTarget,
-  seed,
-}: GenerateDayPlanInput): DayMealPlan {
+function attempt({ meals, foods, dayTarget, seed }: GenerateDayPlanInput): DayMealPlan {
   const foodsById = new Map(foods.map((f) => [f.id, f]))
   const usedProteins = new Set<string>()
   const built = meals.map((meal) => buildMeal(meal, foods, seed + meal.index * 7919, usedProteins))
 
   const totalsOf = () => mealTotals(built.flatMap(itemsOf), foodsById)
-  let deviation = deviationOf(totalsOf(), dayTarget)
-
-  // Ajuste fino: mover porciones de a un paso mientras mejore el error.
-  for (let iter = 0; iter < 120 && !isWithinTolerance(deviation); iter++) {
-    let best: { v: Variable; delta: number; error: number } | null = null
-    for (const meal of built) {
-      for (const v of meal.variables) {
-        const step = portionStep(v.food, v.grams || 50)
-        for (const delta of [step, -step]) {
-          const next = v.grams + delta
-          if (next < 0 || next > v.hi) continue
-          v.grams = next
-          const error = errorOf(deviationOf(totalsOf(), dayTarget))
-          v.grams -= delta
-          if (!best || error < best.error) best = { v, delta, error }
-        }
-      }
-    }
-    if (!best || best.error >= errorOf(deviation)) break
-    best.v.grams += best.delta
-    deviation = deviationOf(totalsOf(), dayTarget)
-  }
+  fineTune(
+    built.flatMap((b) => b.variables),
+    totalsOf(),
+    dayTarget,
+  )
 
   const plannedMeals = built.map((b) => ({ ...b.meal, items: itemsOf(b) }))
   const totals = totalsOf()
+  const deviation = deviationOf(totals, dayTarget)
   return {
     meals: plannedMeals,
     totals,
@@ -286,6 +368,22 @@ export function generateDayPlan({
     deviation,
     withinTolerance: isWithinTolerance(deviation),
   }
+}
+
+const MAX_ATTEMPTS = 4
+
+/**
+ * Genera el menú del día. Si una combinación de alimentos no permite llegar a ±5 %,
+ * prueba otras combinaciones (deterministas) y se queda con la mejor.
+ */
+export function generateDayPlan(input: GenerateDayPlanInput): DayMealPlan {
+  let best: DayMealPlan | null = null
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    const plan = attempt({ ...input, seed: input.seed + i * 104729 })
+    if (plan.withinTolerance) return plan
+    if (!best || errorOf(plan.deviation) < errorOf(best.deviation)) best = plan
+  }
+  return best as DayMealPlan
 }
 
 /** Recalcula totales y desviación después de editar un plan (p. ej. tras un intercambio). */

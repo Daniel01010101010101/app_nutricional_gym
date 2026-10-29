@@ -129,6 +129,15 @@ describe('lista de mercado', () => {
     expect(purchaseQuantity(byId('rice'), 420)).toBe('450 g')
   })
 
+  it('convierte lo cocido a lo que hay que comprar en crudo o en seco', () => {
+    const rice = food({ ...byId('rice'), cooked: { yield: 2.4, buyAs: 'en seco' } })
+    expect(purchaseQuantity(rice, 1200)).toBe('500 g (en seco)')
+    const chicken = food({ ...byId('chicken'), cooked: { yield: 0.75, buyAs: 'crudo' } })
+    expect(purchaseQuantity(chicken, 1200)).toBe('1,6 kg (crudo)')
+    const eggs = food({ ...byId('egg'), cooked: { yield: 1, buyAs: 'crudo' } })
+    expect(purchaseQuantity(eggs, 100)).toBe('2 huevos (crudo)')
+  })
+
   it('ordena alfabéticamente dentro de cada sección', () => {
     const groups = buildShoppingList(
       [

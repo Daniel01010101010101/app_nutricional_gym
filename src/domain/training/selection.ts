@@ -27,6 +27,8 @@ export interface SelectionContext {
   equipment: readonly Equipment[]
   injuries: readonly Joint[]
   excludedIds: readonly string[]
+  /** Ejercicios preferidos (p. ej. jalón en lugar de dominadas si así hiciste el test inicial). */
+  preferredIds?: readonly string[]
 }
 
 export function isExerciseAvailable(exercise: Exercise, ctx: SelectionContext): boolean {
@@ -51,8 +53,10 @@ export function slotScore(
   slot: SlotTemplate,
   patternIndex: number,
   weekUsed: ReadonlySet<string>,
+  preferredIds: readonly string[] = [],
 ): number {
   let score = patternIndex * 100
+  if (preferredIds.includes(exercise.id)) score -= 60
   if (slot.mainLift && exercise.mainLift === slot.mainLift) score -= 50
   if (slot.role === 'main') {
     score += exercise.kind === 'compound' ? 0 : 40
@@ -86,7 +90,7 @@ export function selectExercise(
     if (sessionUsed.has(exercise.id) || !isExerciseAvailable(exercise, ctx)) return
     const patternIndex = slot.patterns.indexOf(exercise.pattern)
     if (patternIndex === -1) return
-    const score = slotScore(exercise, slot, patternIndex, weekUsed)
+    const score = slotScore(exercise, slot, patternIndex, weekUsed, ctx.preferredIds)
     if (!best || score < best.score || (score === best.score && order < best.order)) {
       best = { exercise, score, order }
     }

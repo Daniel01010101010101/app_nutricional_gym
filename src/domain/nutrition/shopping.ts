@@ -38,13 +38,15 @@ const SECTION_ORDER: ShoppingSection[] = [
   'suplementos',
 ]
 
-export function purchaseQuantity(food: Food, grams: number): string {
+export function purchaseQuantity(food: Food, cookedGrams: number): string {
+  const grams = food.cooked ? cookedGrams / food.cooked.yield : cookedGrams
+  const suffix = food.cooked ? ` (${food.cooked.buyAs})` : ''
   if (food.purchase) {
     const count = Math.ceil(roundDecimals(grams / food.purchase.grams, 3))
-    return `${count} ${food.purchase.label}`
+    return `${count} ${food.purchase.label}${suffix}`
   }
-  if (grams >= 1000) return `${fmt(ceilTo(grams / 1000, 0.1), 1)} kg`
-  return `${fmt(ceilTo(grams, 50))} g`
+  if (grams >= 1000) return `${fmt(ceilTo(grams / 1000, 0.1), 1)} kg${suffix}`
+  return `${fmt(ceilTo(grams, 50))} g${suffix}`
 }
 
 /** Agrupa todos los alimentos de varios días por sección del supermercado. */

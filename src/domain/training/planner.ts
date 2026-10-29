@@ -56,6 +56,8 @@ export interface TrainingPlanInput {
   excludedExerciseIds: readonly string[]
   priorityMuscles: readonly Muscle[]
   exercises: readonly Exercise[]
+  /** Ejercicios a preferir cuando compiten por el mismo hueco. */
+  preferredExerciseIds?: readonly string[]
 }
 
 /** Patrones con los que se puede sumar volumen directo a cada músculo. */
@@ -229,6 +231,7 @@ export function generateTrainingPlan(input: TrainingPlanInput): Calculated<Train
     equipment: input.equipment,
     injuries: input.injuries,
     excludedIds: input.excludedExerciseIds,
+    preferredIds: input.preferredExerciseIds ?? [],
   }
   const { split, sessions } = splitForDays(input.daysPerWeek)
   const weekdays = assignWeekdays(input.availableWeekdays, sessions.length)

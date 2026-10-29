@@ -124,6 +124,20 @@ describe('selección de ejercicios', () => {
     ).toBeNull()
   })
 
+  it('respeta los ejercicios preferidos', () => {
+    const none = new Set<string>()
+    const pullSlot = {
+      patterns: ['vertical-pull' as const],
+      role: 'main' as const,
+      mainLift: 'pullup' as const,
+    }
+    expect(selectExercise(pullSlot, EXERCISES, gym, none, none)?.id).toBe('pull-up')
+    expect(
+      selectExercise(pullSlot, EXERCISES, { ...gym, preferredIds: ['lat-pulldown'] }, none, none)
+        ?.id,
+    ).toBe('lat-pulldown')
+  })
+
   it('en accesorios prefiere aislamiento del músculo pedido y variedad semanal', () => {
     const none = new Set<string>()
     const slot = {

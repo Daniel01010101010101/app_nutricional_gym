@@ -10,6 +10,7 @@ import {
 } from './meals'
 import {
   candidatesFor,
+  fineTune,
   generateDayPlan,
   isWithinTolerance,
   maxGramsFor,
@@ -205,6 +206,43 @@ describe('generador de comidas', () => {
         'protein',
       ),
     ).toBe(450)
+  })
+
+  it('si ningún cambio individual mejora, prueba dos cambios a la vez', () => {
+    const mix = food({
+      id: 'mix',
+      name: 'Mix',
+      category: 'supplement',
+      per100g: { kcal: 400, protein: 50, carbs: 50, fat: 0, fiber: 0 },
+      measures: [{ label: '1 scoop', grams: 40 }],
+      roles: ['protein'],
+      slots: ['snack'],
+    })
+    const carb = food({
+      id: 'carb',
+      name: 'Carb',
+      category: 'grain',
+      per100g: { kcal: 400, protein: 0, carbs: 100, fat: 0, fiber: 0 },
+      roles: ['carb'],
+      slots: ['snack'],
+    })
+    const variables = [
+      { food: mix, role: 'protein' as const, lo: 0, hi: 1000, grams: 200 },
+      { food: carb, role: 'carb' as const, lo: 0, hi: 1000, grams: 10 },
+    ]
+    fineTune(
+      variables,
+      { kcal: 830, protein: 107.5, carbs: 100, fat: 0 },
+      { kcal: 800, protein: 100, carbs: 100, fat: 0 },
+    )
+    expect(variables.map((v) => v.grams)).toEqual([180, 15])
+    expect(() =>
+      fineTune(
+        [],
+        { kcal: 900, protein: 200, carbs: 0, fat: 0 },
+        { kcal: 800, protein: 100, carbs: 100, fat: 0 },
+      ),
+    ).not.toThrow()
   })
 
   it('desviación cero cuando el objetivo de un macro es cero', () => {
